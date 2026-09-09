@@ -1,5 +1,7 @@
 # Minara feature videos
 
+**[Open the full motion gallery](https://sherryli-del.github.io/minara-feature-videos/)** — browse 101 shot groups, switch to all 205 rendered versions, preview videos, and jump to the matching source files.
+
 - Source projects behind [Minara](https://minara.ai) product-launch videos and [DMind](https://dmind.ai) Benchmark films.
 - Compositions use [HTML](https://developer.mozilla.org/en-US/docs/Web/HTML), [CSS](https://developer.mozilla.org/en-US/docs/Web/CSS), [GSAP](https://gsap.com/), [HyperFrames](https://github.com/heygen-com/hyperframes), and [Remotion](https://www.remotion.dev/).
 - [Storyboards](harness-1min-scenes/storyboard.html) document the scene structure and production plan.
