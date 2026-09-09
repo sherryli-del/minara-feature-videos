@@ -53,6 +53,25 @@
   const formatBytes = (bytes) => `${(bytes / 1024 / 1024).toFixed(bytes > 10 * 1024 * 1024 ? 0 : 1)} MB`;
   const escapeHtml = (value) => String(value).replace(/[&<>"]/g, (char) => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;'}[char]));
 
+  const visualTagRules = [
+    ['手机', (entry, text) => entry.projectId === 'app2' || /phone|mobile/.test(text)],
+    ['开场', (entry, text) => /opening|introducing|shot[-_ ]?01\b|scene[-_ ]?1\b/.test(text)],
+    ['标题', (entry, text) => /title|introducing|product[-_ ]?reveal/.test(text)],
+    ['聊天', (entry, text) => /chat|assistant|computer[-_ ]?use/.test(text)],
+    ['数据图表', (entry, text) => /benchmark|factor|strategy|portfolio|signal|risk|chart|market|execution/.test(text)],
+    ['卡片', (entry, text) => /card|wall|portfolio|orders|\bui\b|chat|dashboard/.test(text)],
+    ['数字', (entry, text) => /benchmark|factor|strategy|portfolio|orders|risk|market|performance|execution/.test(text)],
+    ['Logo', (entry, text) => /logo|brand|product[-_ ]?reveal|ending/.test(text)],
+    ['结尾', (entry, text) => /ending|exit|shot[-_ ]?ending|scene[-_ ]?6\b|scene[-_ ]?7\b/.test(text)],
+    ['深色', (entry) => ['dmind-kdd', 'harness'].includes(entry.projectId)],
+    ['浅色', (entry) => ['app2', 'dmind-light', 'factors-en', 'factors-jp', 'factors-zh', 'strategy'].includes(entry.projectId)],
+  ];
+
+  function visualTags(entry) {
+    const text = `${entry.title} ${entry.file} ${entry.source || ''}`.toLowerCase();
+    return visualTagRules.filter(([, matches]) => matches(entry, text)).map(([label]) => label);
+  }
+
   function reusePrompt(entries) {
     const lines = entries.map((entry) => {
       const source = entry.source ? sourceLocation(entry.source) : '未匹配到独立源码页';
@@ -118,12 +137,14 @@
       if (state.view === 'latest' && !entry.isLatest) return false;
       if (state.project !== 'all' && entry.projectId !== state.project) return false;
       if (!query) return true;
-      return [entry.title, entry.file, entry.project, entry.source || ''].some((value) => value.toLowerCase().includes(query));
+      const haystack = [entry.title, entry.file, entry.project, entry.source || '', ...visualTags(entry)].join(' ').toLowerCase();
+      return query.split(/\s+/).every((term) => haystack.includes(term));
     });
   }
 
   function cardMarkup(entry) {
     const resolution = entry.width && entry.height ? `${entry.width}×${entry.height}` : '尺寸未知';
+    const tags = visualTags(entry);
     const cover = entry.thumbnail
       ? `<img src="${entry.thumbnail}" alt="${escapeHtml(entry.title)} 的视频画面" loading="lazy">`
       : `<video class="thumb-video" src="${mediaUrl(entry.file)}#t=0.2" muted playsinline preload="metadata" aria-label="${escapeHtml(entry.title)} 的视频画面"></video>`;
@@ -140,6 +161,7 @@
             <input class="select-shot" type="checkbox" aria-label="选择 ${escapeHtml(entry.title)}" ${state.selected.has(entry.id) ? 'checked' : ''}>
           </div>
           <p class="meta"><span>${escapeHtml(entry.projectShort)}</span><span>${formatDuration(entry.duration)}</span><span>${resolution}</span><span>${entry.versions} 个版本</span></p>
+          <div class="visual-tags">${tags.slice(0, 4).map((tag) => `<span>${escapeHtml(tag)}</span>`).join('')}</div>
           <p class="path">${escapeHtml(entry.source || entry.file)}</p>
           <div class="card-actions">
             <button type="button" data-action="preview">放大预览</button>
@@ -248,6 +270,13 @@
   });
   document.querySelectorAll('[data-view]').forEach((button) => button.addEventListener('click', () => setView(button.dataset.view)));
   els.search.addEventListener('input', () => { state.query = els.search.value; renderGallery(); });
+  document.querySelector('#quickTags').addEventListener('click', (event) => {
+    const button = event.target.closest('[data-search-tag]');
+    if (!button) return;
+    state.query = button.dataset.searchTag;
+    els.search.value = state.query;
+    renderGallery();
+  });
   els.clear.addEventListener('click', () => {
     state.project = 'all';
     state.query = '';
