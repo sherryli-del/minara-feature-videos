@@ -80,23 +80,15 @@ a { color: inherit; }
 
 .brand {
   display: inline-flex;
-  align-items: center;
-  gap: 12px;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
   color: var(--ink);
   text-decoration: none;
-  font-size: 13px;
-  font-weight: 800;
-  letter-spacing: .08em;
 }
 
-.brand-mark {
-  width: 25px;
-  height: 25px;
-  display: inline-block;
-  border: 7px solid var(--ink);
-  border-right-color: var(--accent);
-  transform: skewX(-8deg);
-}
+.brand-title { font-size: 13px; font-weight: 800; letter-spacing: .08em; }
+.brand-note { color: var(--muted); font-size: 9px; font-weight: 700; letter-spacing: .14em; }
 
 .top-actions { display: flex; gap: 8px; }
 
@@ -399,8 +391,8 @@ kbd { padding: 4px 7px; border: 1px solid var(--line); border-radius: 5px; color
 
 @media (max-width: 760px) {
   .topbar { min-height: 62px; padding: 0 15px; }
-  .brand { font-size: 11px; }
-  .brand-mark { width: 21px; height: 21px; border-width: 6px; }
+  .brand-title { font-size: 10px; letter-spacing: .05em; }
+  .brand-note { font-size: 8px; }
   .top-actions a { display: none; }
   .shell { padding: 30px 15px 90px; }
   .intro { grid-template-columns: 1fr; align-items: start; }
